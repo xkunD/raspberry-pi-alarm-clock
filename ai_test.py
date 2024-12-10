@@ -1,8 +1,7 @@
 from openai import OpenAI
 
 # Replace with your actual OpenAI API key and Assistant ID
-API_KEY = "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"
-ASSISTANT_ID = "asst_wxlMRa4nobWKN9bSNuQYYzwE"
+
 
 client = OpenAI(
     api_key=API_KEY,
