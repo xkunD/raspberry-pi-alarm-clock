@@ -14,6 +14,7 @@ lock_trigger = FileLock(f"{trigger_file}.lock")
 
 print("Voice recognition ready.")
 
+
 while True:
     try:
         # Check trigger file
@@ -46,4 +47,5 @@ while True:
     except KeyboardInterrupt:
         print("\nExiting voice recognition.")
         break
+
 

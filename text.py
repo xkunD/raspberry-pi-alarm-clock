@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     my_string = "Hi there! I'm a nice bit of wordwrapped text. Won't you be my friend? Honestly, wordwrapping is easy, with David's fancy new render_textrect () function.\nThis is a new line.\n\nThis is another one.\n\n\nAnother line, you lucky dog."
 
-    my_rect = pygame.Rect((40, 40, 300, 300))
+    my_rect = pygame.Rect((0, 0, 300, 300))
     
     rendered_text = render_textrect(my_string, my_font, my_rect, (216, 216, 216), (48, 48, 48), 0)
 

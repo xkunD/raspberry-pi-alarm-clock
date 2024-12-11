@@ -17,6 +17,7 @@ math_flag = False
 ai_flag = False
 print_flag10 = True
 print_flag15 = True
+ai_listen = False
 run_times = 4
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -175,6 +176,9 @@ while True:  # Keep the program running
                         now = datetime.now()
                         alarm_timestamp = datetime(now.year, now.month, now.day, alarm_hours, alarm_minutes).timestamp()
                         alarm_screen = False
+                elif ai_flag:
+                    if 160 <= x <= 240 and 180 <= y <= 240:
+                        ai_flag = False
                 else:
                     # Check if "Set Alarm" button is pressed
                     if 40 <= x <= 120 and 180 <= y <= 240:
@@ -182,7 +186,7 @@ while True:  # Keep the program running
                     if 160 <= x <= 240 and 180 <= y <= 240:
                         print("click ai")
                         ai_flag = True
-                        run_flag = False
+                        ai_listen = True
 
         # Alarm screen
         if alarm_screen:
@@ -198,6 +202,34 @@ while True:  # Keep the program running
             draw_button("Min +", 200, 50)
             draw_button("Min -", 200, 150)
             draw_button("Confirm", 100, 200)
+        elif ai_listen:
+            with open(output_file_ai, "w") as f:
+                f.write('')
+            with lock_trigger:
+                with open(trigger_file, "w") as f:
+                    f.write("START")
+                    print("should written start")
+            try:
+                with open(output_file_ai, "r") as f:
+                    time.sleep(10)
+                    voice_input = f.read().strip()
+                    print(voice_input)
+                    reply = test_openai_assistant(voice_input)
+            except FileNotFoundError:
+                pass  # File not yet created, continue loop  
+            with lock_trigger:
+                with open(trigger_file, "w") as f:
+                    f.write("STOP")
+            ai_listen = False
+        elif ai_flag:
+            screen.fill(black)
+            draw_button("return", 180, 200)
+#            draw_button(reply,50,50)
+            my_font = pygame.font.Font(None, 22)
+            my_rect = pygame.Rect((20, 20, 300, 180))
+            rendered_text = render_textrect(reply, my_font, my_rect, (100,100,100), (12,12,12), 0)
+            screen.blit(rendered_text, my_rect.topleft)
+            #pygame.display.flip()  # Update the display
         else:
             # Display current time
             time_surface = font_large.render(current_time, True, white)
@@ -216,6 +248,8 @@ while True:  # Keep the program running
             last_problem_time = time.time()
             math_flag = True
             run_flag = False  # Pause the clock loop to enter math mode
+            
+        
 
         pygame.display.flip()
 
@@ -243,48 +277,6 @@ while True:  # Keep the program running
     cloud_image = pygame.transform.scale(cloud_image, (125, 80))  # Cloud spans the top
     feedback_message = ""  # Variable to store feedback message
     feedback_timer = 0     # Timer to control feedback visibility
-    while ai_flag:
-        screen.fill(black)
-        pygame.display.flip()  # Update the display
-        with open(output_file_ai, "w") as f:
-                f.write('')
-        with lock_trigger:
-            with open(trigger_file, "w") as f:
-                f.write("START")
-                print("should written start")
-        try:
-            with open(output_file_ai, "r") as f:
-                time.sleep(10)
-                voice_input = f.read().strip()
-                print(voice_input)
-                reply = test_openai_assistant(voice_input)
-            draw_button("return", 180, 200)
-#            draw_button(reply,50,50)
-            my_font = pygame.font.Font(None, 22)
-            my_rect = pygame.Rect((20, 20, 180, 180))
-            rendered_text = render_textrect(reply, my_font, my_rect, (100,100,100), (12,12,12), 0)
-            screen.blit(rendered_text, my_rect.topleft)
-            pygame.display.flip()  # Update the display
-            print("should have button")
-            with lock_trigger:
-                with open(trigger_file, "w") as f:
-                    f.write("STOP")
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run_flag = False
-                    math_flag = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    x, y = event.pos
-                    print("coordinate::",x, y)
-                    if 160 <= x <= 240 and 180 <= y <= 240:
-                        ai_flag = False
-                        run_flag = True
-            time.sleep(15)
-            ai_flag = False
-            run_flag = True
-        except FileNotFoundError:
-            pass  # File not yet created, continue loop
-
     while math_flag:  # Math question loop
         myclock.tick(FPS)
         current_time = time.strftime("%H:%M:%S", time.localtime())
