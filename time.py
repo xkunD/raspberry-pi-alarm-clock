@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from filelock import FileLock
 from ai_test import test_openai_assistant
+from text import render_textrect
 
 # GPIO setup for shutdown
 run_flag = True
@@ -257,16 +258,32 @@ while True:  # Keep the program running
                 voice_input = f.read().strip()
                 print(voice_input)
                 reply = test_openai_assistant(voice_input)
-            draw_button(reply,50,50)
+            draw_button("return", 180, 200)
+#            draw_button(reply,50,50)
+            my_font = pygame.font.Font(None, 22)
+            my_rect = pygame.Rect((20, 20, 180, 180))
+            rendered_text = render_textrect(reply, my_font, my_rect, (100,100,100), (12,12,12), 0)
+            screen.blit(rendered_text, my_rect.topleft)
             pygame.display.flip()  # Update the display
+            print("should have button")
             with lock_trigger:
                 with open(trigger_file, "w") as f:
                     f.write("STOP")
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run_flag = False
+                    math_flag = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    print("coordinate::",x, y)
+                    if 160 <= x <= 240 and 180 <= y <= 240:
+                        ai_flag = False
+                        run_flag = True
             time.sleep(15)
             ai_flag = False
             run_flag = True
         except FileNotFoundError:
-                pass  # File not yet created, continue loop
+            pass  # File not yet created, continue loop
 
     while math_flag:  # Math question loop
         myclock.tick(FPS)
