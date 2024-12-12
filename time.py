@@ -32,18 +32,18 @@ def quit_callback(channel):
 GPIO.add_event_detect(17, GPIO.FALLING, callback=quit_callback, bouncetime=300)
 
 # Setup piTFT display
-#os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use the piTFT frame buffer
-#os.putenv('SDL_FBDEV', '/dev/fb1')  # Specify the piTFT device
-#os.putenv('SDL_MOUSEDRV','dummy')
-#os.putenv('SDL_MOUSEDEV','/dev/null')
-#os.putenv('DISPLAY','')
+os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use the piTFT frame buffer
+os.putenv('SDL_FBDEV', '/dev/fb1')  # Specify the piTFT device
+os.putenv('SDL_MOUSEDRV','dummy')
+os.putenv('SDL_MOUSEDEV','/dev/null')
+os.putenv('DISPLAY','')
 
 # Initialize pygame
 pygame.init()
-pygame.mouse.set_visible(True)
+pygame.mouse.set_visible(False)
 pitft = pigame.PiTft()
 #Alarm communication
-alarm_trigger_file = "alarm_trigger.txt"
+alarm_trigger_file = "/home/pi/final_project/alarm_trigger.txt"
 
 def trigger_alarm():
     with open(alarm_trigger_file, "w") as f:
@@ -69,14 +69,14 @@ alarm_hours = 0
 alarm_minutes = 0
 
 # Button dimensions
-button_width = 80
+button_width = 120
 button_height = 40
 button_color = (100, 100, 200)
 button_highlight = (200, 200, 255)
 
-output_file = "voice_output.txt"
-trigger_file = "trigger.txt"
-output_file_ai = "output_file_ai.txt"
+output_file = "/home/pi/final_project/voice_output.txt"
+trigger_file = "/home/pi/final_project/trigger.txt"
+output_file_ai = "/home/pi/final_project/output_file_ai.txt"
 lock_output = FileLock(f"{output_file}.lock")
 lock_trigger = FileLock(f"{trigger_file}.lock")
 with open(output_file, "w") as f:
@@ -147,7 +147,7 @@ while True:  # Keep the program running
     while run_flag:  # Main clock loop
         pitft.update()
         myclock.tick(FPS)
-        screen.fill(black)
+        screen.fill((245, 191, 66))
         current_time = time.strftime("%H:%M:%S", time.localtime())
 
         # Event handling
@@ -203,6 +203,8 @@ while True:  # Keep the program running
             draw_button("Min -", 200, 150)
             draw_button("Confirm", 100, 200)
         elif ai_listen:
+            screen.fill(black)
+            pygame.display.flip()
             with open(output_file_ai, "w") as f:
                 f.write('')
             with lock_trigger:
@@ -222,7 +224,6 @@ while True:  # Keep the program running
                     f.write("STOP")
             ai_listen = False
         elif ai_flag:
-            screen.fill(black)
             draw_button("return", 180, 200)
 #            draw_button(reply,50,50)
             my_font = pygame.font.Font(None, 22)
@@ -256,14 +257,14 @@ while True:  # Keep the program running
     counter = 0
     correct = 0
     NUM_SNOWFLAKES = 100
-    snowflake_image = pygame.image.load("snow.png").convert_alpha()
+    snowflake_image = pygame.image.load("/home/pi/final_project/snow.png").convert_alpha()
     snowflake_image = pygame.transform.scale(snowflake_image, (20, 20))
     #snowflake_image.fill((255, 255, 255))  # White color
     snowflakes = [{"x": random.randint(0, width), "y": random.randint(-height, height), "speed": random.randint(1, 3)} for _ in range(NUM_SNOWFLAKES)]
     # Load the cloud image
-    cloud_image = pygame.image.load("cloudy.png").convert_alpha()  # Ensure transparency
+    cloud_image = pygame.image.load("/home/pi/final_project/cloudy.png").convert_alpha()  # Ensure transparency
     # Load the raindrop image
-    raindrop_image = pygame.image.load("rain.png").convert_alpha()  # Ensure transparency
+    raindrop_image = pygame.image.load("/home/pi/final_project/rain.png").convert_alpha()  # Ensure transparency
 
     # Resize the image if necessary
     raindrop_image = pygame.transform.scale(raindrop_image, (10, 20))  # Adjust size as needed
@@ -332,11 +333,11 @@ while True:  # Keep the program running
                 # Read voice input from file
             with open(output_file, "r") as f:
                 voice_input = f.read().strip()
+                voice_input = ''.join(filter(str.isdigit, voice_input))
 
                 # Process voice input
             if (time.time() - last_problem_time >= 10) and print_flag10:
                 if voice_input:
-                    voice_input = ''.join(filter(str.isdigit, voice_input))
                     print("Voice input received at 10s of counter:", counter, 'with content:' ,voice_input)
                     if voice_input.isdigit() and int(voice_input) == correct_answer:
                         print("Correct answer!")
@@ -384,7 +385,7 @@ while True:  # Keep the program running
                         alarm_on_15 = True
                 else:
                     print("no content at 15s of counter:", counter, "One more question added.")
-                    feedback_message = "No input received. One more question."
+                    feedback_message = "Incorrect. One more question added."
                     print_flag15 = False
                     run_times += 1
                     last_problem_time += 5

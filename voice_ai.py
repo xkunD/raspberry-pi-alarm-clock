@@ -7,8 +7,8 @@ r = sr.Recognizer()
 mic = sr.Microphone()
 
 # Files for communication
-output_file = "output_file_ai.txt"
-trigger_file = "trigger.txt"
+output_file = "/home/pi/final_project/output_file_ai.txt"
+trigger_file = "/home/pi/final_project/trigger.txt"
 lock_output = FileLock(f"{output_file}.lock")
 lock_trigger = FileLock(f"{trigger_file}.lock")
 

@@ -3,10 +3,10 @@ import time
 import os
 
 # File to check for alarm trigger
-alarm_trigger_file = "alarm_trigger.txt"
+alarm_trigger_file = "/home/pi/final_project/alarm_trigger.txt"
 
 # Initialize VLC MediaPlayer
-p = vlc.MediaPlayer("cliped_alarm.mp3")
+p = vlc.MediaPlayer("/home/pi/final_project/cliped_alarm.mp3")
 
 # Function to clear the alarm trigger
 def clear_alarm_trigger():
