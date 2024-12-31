@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f4f6f7;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .add-alarm {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-alarm input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-alarm button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-alarm button:hover {
+            background-color: #2980b9;
+        }
+
+        #alarms {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .alarm {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .alarm-time {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .add-alarm {
+                flex-direction: column;
+            }
+
+            .add-alarm button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clock"></i> Alarm Manager</h1>
+        </div>
+        
+        <div class="add-alarm">
+            <input type="time" id="alarmTime" placeholder="Set alarm time">
+            <button onclick="addAlarm()">
+                <i class="fas fa-plus"></i> Add Alarm
+            </button>
+        </div>
+
+        <div id="alarms">
+            <div class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <p>No alarms set</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchAlarms() {
+            const response = await fetch('/alarms');
+            const data = await response.json();
+            const alarmsDiv = document.getElementById('alarms');
+            
+            if (data.alarms.length === 0) {
+                alarmsDiv.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No alarms set</p>
+                    </div>
+                `;
+                return;
+            }
+
+            alarmsDiv.innerHTML = data.alarms.map((alarm, index) => `
+                <div class="alarm">
+                    <span class="alarm-time">${alarm}</span>
+                    <button class="delete-btn" onclick="deleteAlarm(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function addAlarm() {
+            const alarmTime = document.getElementById('alarmTime').value;
+            if (alarmTime) {
+                await fetch('/alarms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ time: alarmTime })
+                });
+                fetchAlarms();
+                document.getElementById('alarmTime').value = ''; // Clear input
+            }
+        }
+
+        async function deleteAlarm(id) {
+            await fetch(`/alarms/${id}`, { method: 'DELETE' });
+            fetchAlarms();
+        }
+
+        fetchAlarms(); // Load alarms on page load
+    </script>
+</body>
+</html>
