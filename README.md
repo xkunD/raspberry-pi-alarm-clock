@@ -8,8 +8,8 @@ The **AI Alarm Clock for Deep Sleepers** is an intelligent system designed to ad
 - A web application for remote alarm management.
 
 ### Contributors
-- **Yongye Li** (yl3734@cornell.edu)
-- **Xiaokun Du** (xd239@cornell.edu)
+- **Yongye Li** 
+- **Xiaokun Du**
 
 
 ## Objective
